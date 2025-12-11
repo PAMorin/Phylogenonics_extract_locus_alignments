@@ -1,0 +1,1 @@
+This pipeline is for identifying a set of gene (or other locus) sequences in a reference genome to map their locations, then using the locations to extract the sequences from a set of bam files and create a set of locus alignments for phylogenomic analysis.
