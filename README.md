@@ -33,7 +33,7 @@ Fasta file of locus sequences (example = uce-5k-probes.fasta)
 
 **Outputs**
 Six-column bed file of locus coordinates (including optional sequence padding on each end of the locus coordinates)
-# output bed file has 6 columns:
+### output bed file has 6 columns:
 1. chromosome ID
 2. start position
 3. end position
@@ -43,11 +43,11 @@ Six-column bed file of locus coordinates (including optional sequence padding on
 
 **IMPORTANT**
 In the script, change the paths, pad, and output file name:
-REFERENCE_GENOME="path_to_your_reference_genome"
-QUERY_SEQUENCES="path_to_your_query_sequences"
-OUTPUT_DIR="path_to_your_output_directory"
-PAD=(int)
-OUTPUT_BED="your_bed_file_name"
+REFERENCE_GENOME="path_to_your_reference_genome";
+QUERY_SEQUENCES="path_to_your_query_sequences";
+OUTPUT_DIR="path_to_your_output_directory";
+PAD=(int);
+OUTPUT_BED="your_bed_file_name";
 
 ### Step 2
 
