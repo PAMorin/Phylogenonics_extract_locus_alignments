@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# this is the header for SEDNA
 #SBATCH --job-name=UCE_map2ref   ## job name
 #SBATCH -e UCE_map2ref_%j.e.txt    ## error message name
 #SBATCH -o UCE_map2ref.log.%j.out  ## log file output name
@@ -24,13 +23,10 @@ REFERENCE_GENOME="/home/pmorin/Ref_genomes/Oorc/NCBI_GCA_937001465.1/GCA_9370014
 QUERY_SEQUENCES="/home/pmorin/projects/Miscellaneous/TEST_phylogenomics_extract_loc_align_repo/uce-5k-probes.fasta"
 OUTPUT_DIR="/home/pmorin/projects/Miscellaneous/TEST_phylogenomics_extract_loc_align_repo"
 PAD=500  # Amount of base pairs to add to both sides of the alignment, e.g., for short loci like UCEs. Not needed for long loci (like full genes)
+OUTPUT_BED="${OUTPUT_DIR}/UCE_Oorc_GCA_937001465.bed.txt" # Output file name for the BED data
 
 # Ensure the output directory exists
 mkdir -p ${OUTPUT_DIR}
-
-# Output file name for the BED data
-OUTPUT_BED="${OUTPUT_DIR}/UCE_Oorc_GCA_937001465.bed.txt"
-
 
 # --- Indexing (only needed if not already indexed) ---
 # Check if the bwa-mem2 index files exist. If not, run indexing.
