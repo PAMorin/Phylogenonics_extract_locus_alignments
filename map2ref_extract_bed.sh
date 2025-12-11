@@ -24,6 +24,7 @@ QUERY_SEQUENCES="/home/pmorin/projects/Miscellaneous/TEST_phylogenomics_extract_
 OUTPUT_DIR="/home/pmorin/projects/Miscellaneous/TEST_phylogenomics_extract_loc_align_repo"
 PAD=500  # Amount of base pairs to add to both sides of the alignment, e.g., for short loci like UCEs. Not needed for long loci (like full genes)
 OUTPUT_BED="${OUTPUT_DIR}/UCE_Oorc_GCA_937001465.bed.txt" # Output file name for the BED data
+# --- end User-defined variables ---
 
 # Ensure the output directory exists
 mkdir -p ${OUTPUT_DIR}
