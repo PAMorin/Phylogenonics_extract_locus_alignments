@@ -20,10 +20,11 @@ htslib/1.19 (part of SAMtools and BCFtools, but may need to be installed separat
 
 ### Installing
 
-If you want to run this pipeline, you can simply clone the github repository using the code below:
-```
-git clone git@github.com:pmorin?????
-```
+To copy this pipeline from the github repository https://github.com/PAMorin/Phylogenomics_extract_locus_alignments:
+
+1. Click the green "< > Code" button above the file list.
+2. Select Download ZIP from the dropdown menu. 
+
 
 ## Executing program
 
