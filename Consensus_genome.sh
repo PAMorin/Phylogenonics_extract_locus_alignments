@@ -1,8 +1,8 @@
 #!/bin/bash
 
-#SBATCH --job-name=CONS_OUT_genome   ## job name
-#SBATCH -e CONS_OUT_genome%j.e.txt    ## error message name
-#SBATCH -o CONS_OUT_genome.log.%j.out  ## log file output name
+#SBATCH --job-name=consensus_genome   ## job name
+#SBATCH -e consensus_genome%j.e.txt    ## error message name
+#SBATCH -o consensus_genome.log.%j.out  ## log file output name
 #SBATCH -c 10    ## <number of cores to ask for> (cpu cores per task?)
 #SBATCH -p medmem
 #SBATCH --mem=80G
@@ -10,7 +10,7 @@
 #SBATCH -t 48:00:00   ## walltime in mins or mins:secs or hrs:mins:secs. 
 
 ##########################################################################################
-# Uses Angsd to extract CONS_OUT genome
+# Uses bcftools to extract consensus genome from bam files in parallel (Slurm array). All bam files are in separate  subdirectories within a main directory, named as "species_sample". Bam files are named as "species_sample_dedup.bam", so that "species_sample" is the same for the directory and the first part of the file name. 
 
 module load bio/samtools/1.19
 module load bio/bcftools/1.11
@@ -19,45 +19,44 @@ module load tools/pigz/2.4
 
 set -eux
 
-# --- User-defined variables ---
-# the BAMLIST assumes each bam directory is in a single directory, and each bam file is in its own subdirectory with the same name scheme as the files 
+#### --- User-defined variables ---
+# the BAMLIST is a list of directories, and assumes each bam directory is in a single directory, and each bam file is in its own subdirectory with the same name scheme as the files.  
 BAMLIST=(
 B.b.acu_DRR014695
 B.b.bor_SRR26062094
 )
 
+# reference genome used for WGS read alignments
 REFDIR=/home/pmorin/Ref_genomes/Egla/GCA_028564815.1_mEubGla1_pri
 REF=GCA_028564815.1_mEubGla1.hap2_genomic.fna
-THREADS=10
-
 NGS=/home/pmorin/projects/Miscellaneous/mysticete_phylo/fastq_files
 CONS_OUT=/home/pmorin/projects/Miscellaneous/TEST_phylogenomics_extract_loc_align_repo/consensus_genomes
-TEMP=${CONS_OUT}/TEMP
 baseQ=30
 mapQ=25
 bam=dedup.bam # supply appropriate wildcard to find the bam file within BAMDIR (e.g., if your bam files in each directory end with "dedup.bam", then files with *dedup.bam ending will be used to generate the consensus)
+THREADS=10
 
-# --- end User-defined variables ---
+#### --- end User-defined variables ---
 
 # make output directories if they don't already exist
 mkdir -p ${CONS_OUT}
-mkdir -p ${TEMP}
 
 #####################
-
-# Get working bam file based on array number
-NUM=$(printf %02d ${SLURM_ARRAY_TASK_ID})
 
 # generate windows list for each scaffold
 BAMDIR=${BAMLIST[$SLURM_ARRAY_TASK_ID-1]} # if using an alias list within the script
 echo ${BAMDIR}
 
-# extract the species and sample ID's from the bam directory, assuming name format = Gspe_sample, for Species_sample.
+TEMP=${CONS_OUT}/${BAMDIR}/TEMP
+mkdir -p $TEMP
+
+# extract the species and sample ID's from the bam directory, assuming name format = species_sample.
 SP=`echo $BAMDIR | cut -f1 -d "_"`
 sample=`echo $BAMDIR | cut -f2 -d "_"`
 BAMFILE=$(ls ${NGS}/${BAMDIR}/*${bam}) 
 echo ${BAMFILE}
-BAMNAME=`echo $BAMFILE | cut -f7 -d "/"` # alter to capture bam file name from path.
+BAMNAME=$(basename "$BAMFILE")
+echo ${BAMNAME}
 
 # Define output file name prefix
 OUT_PREFIX=${SP}_${sample}_consensus_genome
@@ -66,9 +65,19 @@ OUT_PREFIX=${SP}_${sample}_consensus_genome
 # call variants
 # based on http://samtools.github.io/bcftools/howtos/consensus-sequence.html and https://www.biostars.org/p/353780/#485121
 
-bcftools mpileup -Ou -f ${REFDIR}/${REF} ${BAMFILE} | bcftools call --threads ${THREADS} -Ou -mv | bcftools norm --threads ${THREADS} -f ${REF_GENOME} -Oz -o ${TEMP}/${BAMNAME}_output.vcf.gz
+# 1. Combine pileup, calling, and normalization into one stream, writing to a file
+bcftools mpileup -Ou -f ${REFDIR}/${REF} ${BAMFILE} | \
+bcftools call --threads ${THREADS} -Ou -mv | \
+bcftools norm --threads ${THREADS} -f ${REFDIR}/${REF} -Oz -o ${TEMP}/${BAMNAME}_output.vcf.gz
+
+# 2. Index the resulting compressed VCF (Required for consensus)
 bcftools index --threads ${THREADS} ${TEMP}/${BAMNAME}_output.vcf.gz
-bcftools consensus --iupac-codes -f ${REF_GENOME} ${TEMP}/${BAMNAME}_output.vcf.gz > ${CONS_OUT}/${OUT_PREFIX}.fa
+
+# 3. Generate the consensus sequence
+bcftools consensus --iupac-codes -f ${REFDIR}/${REF} ${TEMP}/${BAMNAME}_output.vcf.gz > ${CONS_OUT}/${OUT_PREFIX}.fa
+
+# delete vcf file to save space
+rm -r ${TEMP}
 
 # -I, --iupac-codes
 # output variants in the form of IUPAC ambiguity codes determined from FORMAT/GT fields. By default all samples are used and can be subset with -s, --samples and -S, --samples-file. Use -s - to ignore samples and use only the REF and ALT columns. NOTE: prior to version 1.17 the IUPAC codes were determined solely from REF,ALT columns and sample genotypes were not considered.
@@ -80,9 +89,9 @@ bcftools consensus --iupac-codes -f ${REF_GENOME} ${TEMP}/${BAMNAME}_output.vcf.
 ##########
 
 # compress fasta files
-pigz -p ${THREADS} *.fa
+pigz -p ${THREADS} ${CONS_OUT}/${OUT_PREFIX}.fa
 
 # index fasta files
-samtools faidx *.fa.gz
+samtools faidx ${CONS_OUT}/${OUT_PREFIX}.fa.gz
 
 

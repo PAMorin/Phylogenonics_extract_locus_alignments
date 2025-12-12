@@ -12,19 +12,26 @@
 #SBATCH --output=fasta-processing.%j.out
 #########################################################################################
 
+# Filter the locus alignments to remove alignments with >X% N's, copying them to a "high-N" subdirectory, then copy those with ≤X% Ns to a "low_N" subdirectory. 
+
 module load tools/rclone/1.59.2
 
-# Set path to directory containing the fasta files
-FASTA_DIR=/home/pmorin/projects/Miscellaneous/Delphinidae_UCE/aligned_loci_out6
+#### --- User-defined variables ---
 
-# Set path to output directory
-OUTPUT_DIR=${FASTA_DIR}/loci_high_Ns
+# Set path to directory containing the fasta files
+FASTA_DIR=/home/pmorin/projects/Miscellaneous/TEST_phylogenomics_extract_loc_align_repo/aligned_loci_out
+
+# Set names and path for output directories
+highN_DIR=${FASTA_DIR}/loci_high_Ns
 lowN_DIR=${FASTA_DIR}/loci_low_Ns
 
-mkdir -p ${OUTPUT_DIR}
-mkdir -p $lowN_DIR
+pctN=1 # percent N cutoff value
 
-pctN=1
+#### --- end user-defined variables ---
+
+# make output directories
+mkdir -p ${highN_DIR}
+mkdir -p ${lowN_DIR}
 
 # Change to the fasta directory
 cd $FASTA_DIR
@@ -43,15 +50,8 @@ do
     
     # If the percentage of N's is greater than pctN, rename the file
     if (( $(echo "$PERCENT_NS > $pctN" | bc -l) )); then
-        mv $FILE ${OUTPUT_DIR}/${FILE}
+        mv $FILE ${highN_DIR}/${FILE}
     fi
 done
 
-
 mv $FASTA_DIR/*.fasta $lowN_DIR/
-
-# compress and copy to Google Drive
-tar -zcvf Delphinidae_4394UCE_1pctlowN_loci_aligned.tar.gz $lowN_DIR
-
-rclone copy -P Delphinidae_4394UCE_1pctlowN_loci_aligned.tar.gz Gdrive:
-
