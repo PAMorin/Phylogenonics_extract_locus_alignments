@@ -47,15 +47,11 @@ Six-column bed file of locus coordinates (including optional sequence padding on
 
 **IMPORTANT**
 In the script, change the paths, pad, and output file name:
-REFERENCE_GENOME="path_to_your_reference_genome"
-
-QUERY_SEQUENCES="path_to_your_query_sequences"
-
-OUTPUT_DIR="path_to_your_output_directory"
-
-PAD=(int)
-
-OUTPUT_BED="your_bed_file_name"
+REFERENCE_GENOME="path_to_your_reference_genome"  
+QUERY_SEQUENCES="path_to_your_query_sequences"  
+OUTPUT_DIR="path_to_your_output_directory"  
+PAD=(int)  
+OUTPUT_BED="your_bed_file_name"  
 
 
 ### Step 2: generate consensus genomes from mpileup (bam) files for each sample
@@ -63,39 +59,35 @@ OUTPUT_BED="your_bed_file_name"
 sbatch consensus_genome.sh
 ```
 **Required inputs:**
-Bam file for each species WGS data aligned to the reference genome
-Indexed reference genome
+Bam file for each species whole genome sequence data aligned to the reference genome  
+Indexed reference genome  
 
 **Outputs**
-Consensus genome sequence with IUPAC ambiguity codes.
+Consensus genome sequences with IUPAC ambiguity codes.
 
 **IMPORTANT**
-The default organization and naming structure required for the script is for each bam file name to start with <species_sample>, and to be in it's own subdirectory that is also named <species_sample> (e.g., the path to the bam file for <Felis_catus> would be /maindir/Felis_catus/Felis_catus_dedup.bam)
+The default organization and naming structure required for the script is for each bam file name to start with <species_sample>, and to be in it's own subdirectory that is also named <species_sample> (e.g., the path to the bam file for <Felis_catus> would be /maindir/Felis_catus/Felis_catus_dedup.bam).
 
 ### Step 3: Extract the locus sequences from each consensus sequence
 ```
 sbatch extract_loci_array.sh
 ```
 **Required inputs:**
-Consensus sequence from Step 2
+Consensus sequence from Step 2  
 Bed file from Step 1
 
 **Outputs**
 Fasta file for each sample, containing all of the extracted loci.
 
-**IMPORTANT**
 
 ### Step 4: Extract each locus from each sample file and combine them into a locus alignment of all samples in individual locus files. 
 
 **Required inputs:**
-Text file including just the "description" column from the bed file (e.g., UCE_loci.txt)
-
+Text file including just the "description" column from the bed file (e.g., UCE_loci.txt)  
 Directory of fasta files containing extracted loci for each sample from Step 3
 
 **Outputs**
 Directory of locus alignments for each locus, containing the locus sequences for all samples.
-
-**IMPORTANT**
 
 ### Step 5: Filter files to remove locus alignments with more than a specified portion of N's in the alignment.
 ```
@@ -105,8 +97,6 @@ sbatch Filter_XpctN_alignments.sh
 Directory of locus alignments for each locus from Step 4.
 
 **Outputs**
-Two directories containing the locus alignment with > and < the specified percent N cutoff. 
-
-**IMPORTANT**
+Two directories containing the locus alignment with greater-than and less-than the specified percent N cutoff. 
 
 
