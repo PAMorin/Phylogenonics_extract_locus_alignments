@@ -18,7 +18,7 @@ OUTDIR=${INDIR}/aligned_loci_out
 mkdir -p ${OUTDIR}
 
 
-BW_LOC=${LOCDIR}/"Delph_UCE_loc_list_stringent.txt" 
+BW_LOC=${LOCDIR}/"UCE_loc_list.txt" 
 #This is just the "description" column from the bed file, in a text file.
 
 #### --- end User-defined variables ---
