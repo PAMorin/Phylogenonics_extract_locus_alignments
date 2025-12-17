@@ -30,7 +30,7 @@ To copy this pipeline from the github repository https://github.com/PAMorin/Phyl
 
 ### Step 1: Map locus sequences to a reference genome and generate a bed file for their coordinates.
 ```
-sbatch UCE_map2ref_extract_bed.sh
+sbatch map2ref_extract_bed.sh
 ```
 **Required inputs:**  
 Fasta file of locus sequences (example = uce-5k-probes.fasta)
